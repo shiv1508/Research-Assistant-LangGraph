@@ -9,3 +9,8 @@ wheels/
 # Virtual environments
 .venv
 .env
+test.ipynb
+Nodes
+backend/database.sqlite-wal
+backend/database.sqlite-shm
+backend/database.sqlite
