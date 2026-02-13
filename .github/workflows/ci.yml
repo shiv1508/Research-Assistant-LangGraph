@@ -47,5 +47,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Build Compose
-        run: |
-          docker-compose -f docker-compose.yml build --no-cache
+        uses: docker/compose-action@v3
+        with:
+          files: docker-compose.yml
+          args: build --no-cache
