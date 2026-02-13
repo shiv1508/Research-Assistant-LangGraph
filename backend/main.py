@@ -5,7 +5,7 @@ from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
-from agent import build_graph
+from backend.agent import build_graph
 import aiosqlite
 
 # RAG Imports
