@@ -3,7 +3,7 @@ name = "researchassistant"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.13.7"
 dependencies = [
     "aiosqlite>=0.22.1",
     "arxiv>=2.4.0",
