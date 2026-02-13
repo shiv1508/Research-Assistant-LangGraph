@@ -6,7 +6,7 @@ import uuid
 # Configuration
 API_URL = "http://127.0.0.1:8000"
 
-st.set_page_config(page_title="Pinecone Research Agent", layout="wide")
+st.set_page_config(page_title="Research Agent", layout="wide")
 
 # --- SESSION MANAGEMENT ---
 if "user_id" not in st.session_state:
@@ -47,7 +47,7 @@ if uploaded_file:
                 st.sidebar.error("🚨 Backend is offline.")
 
 # --- MAIN UI ---
-st.title("🌲 Pinecone Research Assistant")
+st.title("Research Assistant")
 st.markdown(
     """
     This agent uses **Pinecone** (Serverless Vector DB) for long-term memory.

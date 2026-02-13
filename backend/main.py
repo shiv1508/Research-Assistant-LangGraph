@@ -13,10 +13,15 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
+import mlflow
+from prometheus_client import Counter
 
 load_dotenv("../.env")
 
 DB_PATH = "database.sqlite"
+
+# Prometheus metric: number of chunks uploaded
+MLFLOW_UPLOAD_CHUNKS = Counter("upload_chunks_total", "Total number of chunks uploaded to vector store")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -64,14 +69,27 @@ async def upload_file(thread_id: str = Form(...), file: UploadFile = File(...)):
         # Default to the existing index in your Pinecone project if unset
         index_name = os.getenv("PINECONE_INDEX_NAME", "langchain-pinecone-rag")
 
-        # Attempt upload and provide a clearer error message if the index is missing
+        # Start an MLflow run to track this upload
+        mlflow_run = None
         try:
+            mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://mlflow:5000"))
+            mlflow_run = mlflow.start_run(run_name=f"upload-{thread_id}")
+            mlflow.log_param("pinecone_index", index_name)
+            mlflow.log_param("namespace", thread_id)
+            mlflow.log_param("chunks_attempting", len(splits))
+
+            # Attempt upload and provide a clearer error message if the index is missing
             PineconeVectorStore.from_documents(
                 documents=splits,
                 embedding=embeddings,
                 index_name=index_name,
                 namespace=thread_id  # Segregates data by user/thread
             )
+
+            # Log success metrics
+            mlflow.log_metric("chunks_uploaded", len(splits))
+            MLFLOW_UPLOAD_CHUNKS.inc(len(splits))
+
         except Exception as e:
             err_msg = str(e)
             guidance = (
@@ -81,7 +99,12 @@ async def upload_file(thread_id: str = Form(...), file: UploadFile = File(...)):
                 "PINECONE_INDEX_NAME to a valid index (for example: 'langchain-pinecone-rag')."
             )
             print(guidance)
+            if mlflow_run:
+                mlflow.log_param("error", err_msg)
             raise HTTPException(status_code=500, detail=guidance)
+        finally:
+            if mlflow_run:
+                mlflow.end_run()
         
         # Cleanup
         os.remove(temp_filename)
