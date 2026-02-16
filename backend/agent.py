@@ -5,7 +5,7 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_pinecone import PineconeVectorStore
-from langchain_core.runnables import RunnableConfig  # <--- FIX: Import this
+from langchain_core.runnables import RunnableConfig
 
 # --- STATE DEFINITION ---
 class AgentState(TypedDict):
@@ -18,7 +18,6 @@ class AgentState(TypedDict):
 
 # --- NODES ---
 
-# <--- FIX: Update type hint from 'dict' to 'RunnableConfig'
 async def researcher_node(state: AgentState, config: RunnableConfig):
     """Searches Web AND Pinecone Vector DB."""
     
